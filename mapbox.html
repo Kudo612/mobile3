@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>現在位置表示</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src='https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-language/v1.0.0/mapbox-gl-language.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css' rel='stylesheet' />
+<style>
+	body { margin: 0; padding: 0; }
+	#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #button {
+        display: block;
+        position: relative;
+        margin: 0px auto;
+        width: 50%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+    
+</style>
+</head>
+<body>
+    <div id="map"></div>
+    <br />
+    <button id="button"> 現在位置取得 </button>    
+	<script>
+		mapboxgl.accessToken = 'pk.eyJ1Ijoia3Vkb3dhdGEiLCJhIjoiY21odHk4dHBzMDMydTJpczliZXdpNnZhNCJ9.LfPTc4EgaxG6nWxy3x3TvQ';
+		var map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/streets-v11', 
+            center: [136.66240338447, 36.562140121241],
+            zoom: 15 // starting zoom
+		});
+	
+		mapboxgl.setRTLTextPlugin('https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js');
+		map.addControl(new MapboxLanguage({
+  		defaultLanguage: 'ja'
+		}));
+
+        button.onclick = () => {
+            navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
+            //　位置取得に成功したとき
+            function geoSuccess(event) {
+                const lat = event.coords["latitude"];
+                const lng = event.coords["longitude"];
+                map.flyTo({ center: [lng, lat] });
+            }
+            // 位置取得に失敗したとき
+            function geoError(event) {
+                alert("位置取得失敗:" + event.code); 
+            }
+        }
+	</script>
+</body>
+</html>
