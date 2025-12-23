@@ -11,3 +11,5 @@
 コミットってこうするのね！
 
 git clone https://github.com/ユーザー名/mobile3.git
+
+git clone git@github.com:ユーザー名/mobile3.git
