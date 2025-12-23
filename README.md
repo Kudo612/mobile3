@@ -9,3 +9,5 @@
 　　・スマホでのUIどうしようね～
   　・ランキングをクリックした時にその地点に移動
 コミットってこうするのね！
+
+git clone https://github.com/ユーザー名/mobile3.git
