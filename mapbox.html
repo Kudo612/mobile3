@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>現在位置表示</title>
+<title>マップのスタイル選択</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src='https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js'></script>
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-language/v1.0.0/mapbox-gl-language.js'></script>
@@ -10,54 +10,140 @@
 <style>
 	body { margin: 0; padding: 0; }
 	#map { position: absolute; top: 0; bottom: 0; width: 100%; }
-    #button {
-        display: block;
-        position: relative;
-        margin: 0px auto;
-        width: 50%;
-        height: 40px;
+    #menu {
+        position: absolute;
+        background: #fff;
         padding: 10px;
-        border: none;
-        border-radius: 3px;
-        font-size: 12px;
-        text-align: center;
-        color: #fff;
-        background: #ee8a65;
+        font-family: 'Open Sans', sans-serif;
     }
-    
 </style>
 </head>
 <body>
     <div id="map"></div>
-    <br />
-    <button id="button"> 現在位置取得 </button>    
+    <div id="menu">
+        <input id="streets-v12" type="radio" name="rtoggle" value="streets" checked="checked">
+        <label for="streets-v12">streets</label>
+        <input id="light-v11" type="radio" name="rtoggle" value="light">
+        <label for="light-v11">light</label>
+        <input id="dark-v11" type="radio" name="rtoggle" value="dark">
+        <label for="dark-v11">dark</label>
+        <input id="outdoors-v12" type="radio" name="rtoggle" value="outdoors">
+        <label for="outdoors-v12">outdoors</label>
+        <input id="satellite-streets-v12" type="radio" name="rtoggle" value="satellite">
+        <label for="satellite-streets-v12">satellite-streets</label>
+    </div>
 	<script>
 		mapboxgl.accessToken = 'pk.eyJ1Ijoia3Vkb3dhdGEiLCJhIjoiY21odHk4dHBzMDMydTJpczliZXdpNnZhNCJ9.LfPTc4EgaxG6nWxy3x3TvQ';
-		var map = new mapboxgl.Map({
+		const map = new mapboxgl.Map({
             container: 'map', // container id
             style: 'mapbox://styles/mapbox/streets-v11', 
             center: [136.66240338447, 36.562140121241],
             zoom: 15 // starting zoom
 		});
-	
+        // 表示の日本語化  
 		mapboxgl.setRTLTextPlugin('https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js');
-		map.addControl(new MapboxLanguage({
+		    map.addControl(new MapboxLanguage({
   		defaultLanguage: 'ja'
-		}));
+		}));  
 
-        button.onclick = () => {
-            navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
-            //　位置取得に成功したとき
-            function geoSuccess(event) {
-                const lat = event.coords["latitude"];
-                const lng = event.coords["longitude"];
-                map.flyTo({ center: [lng, lat] });
-            }
-            // 位置取得に失敗したとき
-            function geoError(event) {
-                alert("位置取得失敗:" + event.code); 
-            }
+        // マップのコントローラを追加
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // マップのスタイル選択
+        const layerList = document.getElementById('menu');
+        const inputs = layerList.getElementsByTagName('input'); 
+        function switchLayer(layer) {
+            const layerId = layer.target.id;
+            map.setStyle('mapbox://styles/mapbox/' + layerId);
         }
+        for (let i = 0; i < inputs.length; i++) {
+            inputs[i].addEventListener('click', function(e) {
+                switchLayer(e); 
+                // 選択したレイヤーを日本語化     
+                map.addControl(new MapboxLanguage({
+                defaultLanguage: 'ja'
+		        }));      
+            });
+        }
+
+        // アイコンの追加
+        map.on('load', () =>  {
+            map.addSource('places', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':
+                                    '<strong>兼六園</strong><p><a href="http://www.pref.ishikawa.jp/siro-niwa/kenrokuen/" target="_blank" title="新しウィンドウで開きます">ホームページ </a> </p>',
+                                'icon': 'park'
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [136.66240338447, 36.5618]　// 136.66240338447, 36.562140121241
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':
+                                    '<strong>金沢駅</strong><p><a href="https://www.kanazawa-kankoukyoukai.or.jp/spot/detail_10050.html" target="_blank" title="新しウィンドウで開きます">鼓門が出迎えます </a></p>',
+                                'icon': 'rail'
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [136.649260, 36.5775 ] //36.577769
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':
+                                    '<strong>工大</strong><p>私の大学です<a href="https://www.kanazawa-it.ac.jp/" target="_blank" title="新しウィンドウで開きます">詳細はこちら</a></p>',
+                                'icon': 'college'
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [136.6282672, 36.5286532]
+                            }
+                        },
+                    ]
+                }
+            });
+            // アイコンの場所を示すレイヤーを追加
+            map.addLayer({
+                'id': 'places',
+                'type': 'symbol',
+                'source': 'places',
+                'layout': {
+                    'icon-image': '{icon}-15',
+                    'icon-allow-overlap': true
+                }
+            });
+
+            // 設定したアイコンをクリックするとそれに関するポップアップが表示される
+            map.on('click', 'places',  (e) => {
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const description = e.features[0].properties.description;
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            // マウスが設定したアイコンにオーバーラップするとマウスはポインタ表示になる。
+            map.on('mouseenter', 'places', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // 設定したアイコンから離れるともとに戻る
+            map.on('mouseleave', 'places', () => {
+                map.getCanvas().style.cursor = '';
+            });
+        });
 	</script>
 </body>
 </html>
